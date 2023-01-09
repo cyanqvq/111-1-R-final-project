@@ -1,0 +1,202 @@
+---
+title: "finalProject"
+output: html_notebook
+---
+
+
+
+```{r}
+browseURL("https://media.taiwan.net.tw/XMLReleaseALL_public/Hotel_C_f.csv")
+
+Hotel_1=list()
+
+library(readr)
+X1233<-read.csv("https://media.taiwan.net.tw/XMLReleaseALL_public/Hotel_C_f.csv")
+
+Hotel_1$data$Hotel_12<-list(
+  value=X1233,
+  descruption="X1233",
+  source="https://media.taiwan.net.tw/XMLReleaseALL_public/Hotel_C_f.csv"
+)
+
+View(X1233)
+
+```
+
+#資料來源
+
+
+```{r}
+Hotel_12<-Hotel_1$data$Hotel_12
+
+```
+
+```{r}
+Hotel_12$value|>names()
+
+```
+
+```{r}
+Hotel_12$value<-X1233[c(2, 3, 5, 7, 8, 24, 25, 27, 28)]
+
+```
+
+#篩選選用資料
+
+
+```{r}
+library(magrittr)
+length(Hotel_12$value)
+Hotel_12$value|>dplyr::glimpse()
+Hotel_12$value|>names()
+
+```
+
+#數據量
+
+
+```{r}
+complete.cases(Hotel_12$value)
+
+sum(is.na(Hotel_12$value))
+Hotel_12$value<-Hotel_12$value[complete.cases(Hotel_12$value),]
+
+```
+
+#刪除資料缺失者
+
+
+```{r}
+sum(is.na(Hotel_12$value))
+
+```
+
+#更改後結果
+
+
+```{r}
+class(Hotel_12$value$LowestPrice)
+is.numeric(Hotel_12$value$LowestPrice)
+as.numeric(Hotel_12$value$LowestPrice)
+
+```
+
+#數據最低住房價格
+
+
+```{r}
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$LowestPrice>=1000, Hotel_12$value$LowestPrice<2500, 
+    Hotel_12$value$Region == '高雄市'
+  ) ->Hotel_12_priceAndRegionChoiceOfKaohsiung_Low
+
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$LowestPrice>=1000, Hotel_12$value$LowestPrice<2500, 
+    Hotel_12$value$Region == '臺北市'
+  ) ->Hotel_12_priceAndRegionChoiceOfTaipei_Low
+
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$LowestPrice>=1000, Hotel_12$value$LowestPrice<2500, 
+    Hotel_12$value$Region == '花蓮縣'
+  ) ->Hotel_12_priceAndRegionChoiceOfHualien_Low
+
+
+View(Hotel_12_priceAndRegionChoiceOfKaohsiung_Low)
+View(Hotel_12_priceAndRegionChoiceOfTaipei_Low)
+View(Hotel_12_priceAndRegionChoiceOfHualien_Low)
+
+```
+
+#選取低價錢區間，以分別統計低價民宿數量
+
+
+```{r}
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$LowestPrice>=2500, 
+    Hotel_12$value$Region == '高雄市'
+  ) ->Hotel_12_priceAndRegionChoiceOfKaohsiung_High
+
+Hotel_12$value |>
+  dplyr::filter(
+   Hotel_12$value$LowestPrice>=2500, 
+    Hotel_12$value$Region == '臺北市'
+  ) ->Hotel_12_priceAndRegionChoiceOfTaipei_High
+
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$LowestPrice>=2500, 
+    Hotel_12$value$Region == '花蓮縣'
+  ) ->Hotel_12_priceAndRegionChoiceOfHualien_High
+
+
+View(Hotel_12_priceAndRegionChoiceOfKaohsiung_High)
+View(Hotel_12_priceAndRegionChoiceOfTaipei_High)
+View(Hotel_12_priceAndRegionChoiceOfHualien_High)
+
+```
+
+#選取高價區間，以分別統計高價民宿數量
+
+
+```{r}
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$Region == '高雄市'
+  ) ->Hotel_12_priceAndRegionChoiceOfKaohsiung_Average
+
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$Region == '臺北市'
+  ) ->Hotel_12_priceAndRegionChoiceOfTaipei_Average
+
+Hotel_12$value |>
+  dplyr::filter(
+    Hotel_12$value$Region == '花蓮縣'
+  ) ->Hotel_12_priceAndRegionChoiceOfHualien_Average
+
+
+View(Hotel_12_priceAndRegionChoiceOfKaohsiung_Average)
+View(Hotel_12_priceAndRegionChoiceOfTaipei_Average)
+View(Hotel_12_priceAndRegionChoiceOfHualien_Average)
+
+```
+
+#選取總價區間，並統計民宿數量以計算平均總價格
+
+
+```{r}
+sum(Hotel_12_priceAndRegionChoiceOfKaohsiung_Low$LowestPrice)/135 -> 
+  AverageTotalLowPrice_Of_Kaoshiung
+sum(Hotel_12_priceAndRegionChoiceOfTaipei_Low$LowestPrice)/136 -> 
+  AverageTotalLowPrice_Of_Taipei
+sum(Hotel_12_priceAndRegionChoiceOfHualien_Low$LowestPrice)/399 -> 
+  AverageTotalLowPrice_Of_Hualien
+
+c(AverageTotalLowPrice_Of_Kaoshiung, AverageTotalLowPrice_Of_Taipei, AverageTotalLowPrice_Of_Hualien)
+
+
+sum(Hotel_12_priceAndRegionChoiceOfKaohsiung_High$LowestPrice)/282 -> AverageTotalHighPrice_Of_Kaoshiung
+sum(Hotel_12_priceAndRegionChoiceOfTaipei_High$LowestPrice)/482 -> 
+  AverageTotalHighPrice_Of_Taipei
+sum(Hotel_12_priceAndRegionChoiceOfHualien_High$LowestPrice)/1426 -> 
+  AverageTotalHighPrice_Of_Hualien
+
+c(AverageTotalHighPrice_Of_Kaoshiung, AverageTotalHighPrice_Of_Taipei, AverageTotalHighPrice_Of_Hualien)
+
+
+sum(Hotel_12_priceAndRegionChoiceOfKaohsiung_Average$LowestPrice)/417 -> AverageTotalAveragePrice_Of_Kaoshiung
+sum(Hotel_12_priceAndRegionChoiceOfTaipei_Average$LowestPrice)/618 -> 
+  AverageTotalAveragePrice_Of_Taipei
+sum(Hotel_12_priceAndRegionChoiceOfHualien_Average$LowestPrice)/1825 -> 
+  AverageTotalAveragePrice_Of_Hualien
+
+c(AverageTotalAveragePrice_Of_Kaoshiung, AverageTotalAveragePrice_Of_Taipei, AverageTotalAveragePrice_Of_Hualien)
+
+```
+
+#顯示三個範圍內三個不同縣市的平均價位
+
